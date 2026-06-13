@@ -1,0 +1,138 @@
+@use '@/styles/variables.scss' as *;
+
+.shoeCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 300rpx;
+  background: $color-bg-hover;
+}
+
+.shoeImage {
+  width: 100%;
+  height: 100%;
+}
+
+.idleBadge {
+  position: absolute;
+  top: $spacing-sm;
+  right: $spacing-sm;
+  background: $color-idle-hint;
+  color: $color-text-white;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-xs;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.suedeBadge {
+  position: absolute;
+  top: $spacing-sm;
+  left: $spacing-sm;
+  background: $color-suede-warning;
+  color: $color-text-white;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-xs;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.cardContent {
+  padding: $spacing-md;
+}
+
+.shoeName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+  @include text-ellipsis;
+}
+
+.shoeBrand {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-md;
+}
+
+.colorTags {
+  display: flex;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.colorDot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: $radius-round;
+  border: 2rpx solid $color-border;
+}
+
+.tagContainer {
+  display: flex;
+  gap: $spacing-xs;
+  flex-wrap: wrap;
+  margin-bottom: $spacing-md;
+}
+
+.sceneTag {
+  background: $color-tag-commute;
+  color: $color-info;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+
+  &.sport {
+    background: $color-tag-sport;
+    color: $color-primary;
+  }
+
+  &.casual {
+    background: $color-tag-casual;
+    color: $color-success;
+  }
+}
+
+.statsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+
+  .statValue {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+  }
+
+  .statLabel {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+    margin-top: $spacing-xs;
+  }
+
+  &:not(:last-child) {
+    border-right: 1rpx solid $color-divider;
+  }
+}

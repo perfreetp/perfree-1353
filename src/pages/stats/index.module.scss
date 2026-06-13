@@ -1,0 +1,364 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  margin-top: $spacing-lg;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.sectionAction {
+  font-size: $font-size-sm;
+  color: $color-primary;
+}
+
+.trendSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+}
+
+.trendHeader {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.trendChart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 200rpx;
+  gap: $spacing-xs;
+}
+
+.trendBar {
+  flex: 1;
+  background: linear-gradient(180deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-xs $radius-xs 0 0;
+  min-height: 8rpx;
+  position: relative;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.trendValue {
+  position: absolute;
+  top: -36rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.trendLabel {
+  text-align: center;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+}
+
+.trendBars {
+  display: flex;
+  flex: 1;
+  gap: $spacing-xs;
+  align-items: flex-end;
+}
+
+.mostWornSection {
+  margin-bottom: $spacing-lg;
+}
+
+.rankingList {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  overflow: hidden;
+}
+
+.rankingItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  border-bottom: 1rpx solid $color-divider;
+  transition: all $transition-base;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.rankingNumber {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-round;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  flex-shrink: 0;
+
+  &.rank1 {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb800 100%);
+  }
+
+  &.rank2 {
+    background: linear-gradient(135deg, #c0c0c0 0%, #a0a0a0 100%);
+  }
+
+  &.rank3 {
+    background: linear-gradient(135deg, #cd7f32 0%, #a0522d 100%);
+  }
+
+  &.other {
+    background: $color-text-tertiary;
+  }
+}
+
+.rankingImage {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.rankingInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.rankingName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.rankingDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-top: $spacing-xs;
+}
+
+.rankingCount {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  flex-shrink: 0;
+}
+
+.rankingUnit {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-left: $spacing-xs;
+}
+
+.idleSection {
+  margin-bottom: $spacing-lg;
+}
+
+.idleList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.idleCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  border-left: 6rpx solid $color-idle-hint;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.idleImage {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.idleInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.idleName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.idleDays {
+  font-size: $font-size-sm;
+  color: $color-idle-hint;
+  margin-top: $spacing-xs;
+  font-weight: $font-weight-medium;
+}
+
+.idleWears {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-xs;
+}
+
+.sceneSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+}
+
+.sceneTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+}
+
+.sceneChart {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.sceneItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.sceneLabel {
+  width: 80rpx;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.sceneBarContainer {
+  flex: 1;
+  height: 24rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-round;
+  overflow: hidden;
+}
+
+.sceneBar {
+  height: 100%;
+  border-radius: $radius-round;
+  transition: width $transition-base;
+
+  &.commute {
+    background: linear-gradient(90deg, $color-info 0%, #336ba3 100%);
+  }
+
+  &.sport {
+    background: linear-gradient(90deg, $color-primary 0%, $color-primary-light 100%);
+  }
+
+  &.casual {
+    background: linear-gradient(90deg, $color-success 0%, #33d957 100%);
+  }
+}
+
+.sceneValue {
+  width: 80rpx;
+  text-align: right;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  flex-shrink: 0;
+}
+
+.monthlySection {
+  margin-bottom: $spacing-lg;
+}
+
+.monthlyCard {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  color: $color-text-white;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.monthlyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.monthlyTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+}
+
+.monthlyStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+}
+
+.monthlyStatItem {
+  text-align: center;
+}
+
+.monthlyStatValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+}
+
+.monthlyStatLabel {
+  font-size: $font-size-xs;
+  opacity: 0.8;
+  margin-top: $spacing-xs;
+}

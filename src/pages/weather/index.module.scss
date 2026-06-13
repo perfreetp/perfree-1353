@@ -1,0 +1,226 @@
+@use '@/styles/variables.scss' as *;
+
+.pageContainer {
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+}
+
+.weatherSection {
+  margin-bottom: $spacing-lg;
+}
+
+.forecastSection {
+  margin-bottom: $spacing-lg;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  margin-top: $spacing-lg;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.forecastList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.forecastItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.rainy, &.snowy {
+    border-left: 6rpx solid $color-suede-warning;
+  }
+}
+
+.forecastDate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100rpx;
+}
+
+.forecastDay {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.forecastWeekday {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.forecastIcon {
+  font-size: 60rpx;
+  min-width: 80rpx;
+  text-align: center;
+}
+
+.forecastInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.forecastCondition {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.forecastTemp {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.forecastTempRange {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  min-width: 120rpx;
+  text-align: right;
+}
+
+.sensitiveSection {
+  margin-bottom: $spacing-lg;
+}
+
+.sensitiveList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.sensitiveItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  border-left: 6rpx solid $color-suede-warning;
+}
+
+.sensitiveImage {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.sensitiveInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.sensitiveName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.sensitiveMaterial {
+  font-size: $font-size-sm;
+  color: $color-suede-warning;
+  margin-top: $spacing-xs;
+}
+
+.suggestSection {
+  background: linear-gradient(135deg, $color-info 0%, #336ba3 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  color: $color-text-white;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.suggestTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-md;
+}
+
+.suggestItem {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.suggestIcon {
+  font-size: $font-size-lg;
+  flex-shrink: 0;
+}
+
+.suggestText {
+  font-size: $font-size-sm;
+  line-height: $line-height-loose;
+  opacity: 0.95;
+}
+
+.recommendSection {
+  margin-bottom: $spacing-lg;
+}
+
+.recommendScroll {
+  margin: 0 -$page-padding;
+  padding: 0 $page-padding;
+}
+
+.recommendItem {
+  @include scroll-x-item(320rpx);
+  margin-right: $spacing-md;
+
+  &:last-child {
+    margin-right: $page-padding;
+  }
+}
+
+.warningBanner {
+  background: linear-gradient(135deg, $color-suede-warning 0%, #ff6b6b 100%);
+  color: $color-text-white;
+  padding: $spacing-md $spacing-lg;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-lg;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  box-shadow: $shadow-card;
+}
+
+.warningIcon {
+  font-size: $font-size-xl;
+}
+
+.warningText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  flex: 1;
+  line-height: $line-height-normal;
+}

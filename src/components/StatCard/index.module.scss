@@ -1,0 +1,63 @@
+@use '@/styles/variables.scss' as *;
+
+.statCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-md;
+  text-align: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+
+  &.success {
+    background: linear-gradient(135deg, $color-success 0%, #33d957 100%);
+    color: $color-text-white;
+  }
+
+  &.warning {
+    background: linear-gradient(135deg, $color-warning 0%, #ff9a33 100%);
+    color: $color-text-white;
+  }
+
+  &.info {
+    background: linear-gradient(135deg, $color-info 0%, #336ba3 100%);
+    color: $color-text-white;
+  }
+}
+
+.statIcon {
+  font-size: 48rpx;
+  margin-bottom: $spacing-sm;
+}
+
+.statValue {
+  font-size: 56rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1.2;
+}
+
+.statUnit {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-normal;
+  opacity: 0.9;
+}
+
+.statLabel {
+  font-size: $font-size-sm;
+  margin-top: $spacing-xs;
+  opacity: 0.8;
+}
+
+.statSubtitle {
+  font-size: $font-size-xs;
+  margin-top: $spacing-xs;
+  opacity: 0.6;
+}

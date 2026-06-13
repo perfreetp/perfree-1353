@@ -1,0 +1,97 @@
+@use '@/styles/variables.scss' as *;
+
+.careCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.typeBadge {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  background: $color-tag-commute;
+  color: $color-info;
+
+  &.clean {
+    background: #e8f3ff;
+    color: $color-info;
+  }
+
+  &.waterproof {
+    background: #e8fff0;
+    color: $color-success;
+  }
+
+  &.condition {
+    background: #fff1e8;
+    color: $color-warning;
+  }
+
+  &.repair {
+    background: #ffe8e8;
+    color: $color-error;
+  }
+}
+
+.dateText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.shoeName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.productsSection {
+  margin-bottom: $spacing-md;
+}
+
+.productsLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xs;
+}
+
+.productTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+}
+
+.productTag {
+  padding: $spacing-xs $spacing-sm;
+  background: $color-bg-hover;
+  border-radius: $radius-xs;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.notes {
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
