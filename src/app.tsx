@@ -3,6 +3,9 @@ import { useDidShow, useDidHide } from '@tarojs/taro';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/zh-cn';
+import { useShoeStore } from '@/store/useShoeStore';
+import { useOutfitStore } from '@/store/useOutfitStore';
+import { useCareStore } from '@/store/useCareStore';
 // 全局样式
 import './app.scss';
 
@@ -10,13 +13,19 @@ dayjs.extend(relativeTime);
 dayjs.locale('zh-cn');
 
 function App(props) {
-  // 可以使用所有的 React Hooks
-  useEffect(() => {});
+  const initShoeStore = useShoeStore((state) => state.initFromStorage);
+  const initOutfitStore = useOutfitStore((state) => state.initFromStorage);
+  const initCareStore = useCareStore((state) => state.initFromStorage);
 
-  // 对应 onShow
+  useEffect(() => {
+    initShoeStore();
+    initOutfitStore();
+    initCareStore();
+    console.log('[App] 所有Store初始化完成');
+  }, [initShoeStore, initOutfitStore, initCareStore]);
+
   useDidShow(() => {});
 
-  // 对应 onHide
   useDidHide(() => {});
 
   return props.children;

@@ -104,7 +104,7 @@ $transition-slow: 0.35s ease;
 }
 
 // 横向滚动子项（微信小程序兼容，必须配合 scroll-x-container 使用）
-@mixin scroll-x-item($width) {
+@mixin scroll-x-item($width: auto) {
   display: inline-block;
   width: $width;
   vertical-align: top;

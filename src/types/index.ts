@@ -67,6 +67,7 @@ export interface MonthlyReport {
   mostWorn: {
     shoeId: string;
     shoeName: string;
+    shoeImage?: string;
     count: number;
   } | null;
   byScene: {
