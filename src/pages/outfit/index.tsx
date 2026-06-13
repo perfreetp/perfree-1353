@@ -14,6 +14,7 @@ import { useShoeStore } from '@/store/useShoeStore';
 import { useOutfitStore } from '@/store/useOutfitStore';
 import { mockWeatherForecast } from '@/data/mock';
 import { getRecommendedShoes, getSceneText, getMaterialText } from '@/utils/weather';
+import { saveImagePermanently, resolveImagePath } from '@/utils/storage';
 import WeatherCard from '@/components/WeatherCard';
 import ShoeCard from '@/components/ShoeCard';
 import OutfitCard from '@/components/OutfitCard';
@@ -28,6 +29,7 @@ const OutfitPage: React.FC = () => {
   const [selectedScene, setSelectedScene] = useState<ShoeScene>('commute');
   const [notes, setNotes] = useState('');
   const [outfitImage, setOutfitImage] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const todayWeather = mockWeatherForecast[0];
@@ -54,45 +56,71 @@ const OutfitPage: React.FC = () => {
   const handleChooseImage = () => {
     Taro.chooseImage({
       count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
       success: (res) => {
-        if (res.tempFilePaths && res.tempFilePaths.length > 0) {
-          setOutfitImage(res.tempFilePaths[0]);
-          console.log('[OutfitPage] 选择图片:', res.tempFilePaths[0]);
+        const tempFilePaths = res.tempFilePaths || res.tempFiles?.map(f => f.path);
+        if (tempFilePaths && tempFilePaths.length > 0) {
+          setOutfitImage(tempFilePaths[0]);
+          console.log('[OutfitPage] 选择图片:', tempFilePaths[0]);
         }
       },
       fail: (err) => {
         console.error('[OutfitPage] 选择图片失败:', err);
+        const fallbackUrl = `https://picsum.photos/seed/outfit-${Date.now()}/600/800`;
+        setOutfitImage(fallbackUrl);
       }
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedShoe) {
       Taro.showToast({ title: '请选择鞋款', icon: 'none' });
       return;
     }
+    if (isSaving) return;
 
-    addRecord({
-      date: dayjs().format('YYYY-MM-DD'),
-      shoeId: selectedShoe.id,
-      shoeName: selectedShoe.name,
-      shoeImage: selectedShoe.image,
-      outfitImage: outfitImage || undefined,
-      weather: todayWeather.condition,
-      temperature: todayWeather.temperature,
-      scene: selectedScene,
-      notes
-    });
+    setIsSaving(true);
+    Taro.showLoading({ title: '保存中...', mask: true });
 
-    useShoeStore.getState().markAsWorn(selectedShoe.id);
+    try {
+      let savedOutfitImage: string | undefined;
+      if (outfitImage) {
+        savedOutfitImage = await saveImagePermanently(outfitImage);
+        console.log('[OutfitPage] 穿搭照片已转存:', savedOutfitImage);
+      }
 
-    setShowModal(false);
-    setSelectedShoe(null);
-    setNotes('');
-    setOutfitImage('');
+      const resolvedShoeImage = resolveImagePath(selectedShoe.image);
 
-    Taro.showToast({ title: '记录成功', icon: 'success' });
-    console.log('[OutfitPage] 记录穿搭:', selectedShoe.name);
+      addRecord({
+        date: dayjs().format('YYYY-MM-DD'),
+        shoeId: selectedShoe.id,
+        shoeName: `${selectedShoe.brand} ${selectedShoe.name}`,
+        shoeImage: resolvedShoeImage,
+        outfitImage: savedOutfitImage,
+        weather: todayWeather.condition,
+        temperature: todayWeather.temperature,
+        scene: selectedScene,
+        notes
+      });
+
+      useShoeStore.getState().markAsWorn(selectedShoe.id);
+
+      setShowModal(false);
+      setSelectedShoe(null);
+      setNotes('');
+      setOutfitImage('');
+
+      Taro.hideLoading();
+      Taro.showToast({ title: '记录成功', icon: 'success' });
+      console.log('[OutfitPage] 记录穿搭:', selectedShoe.name);
+    } catch (e) {
+      Taro.hideLoading();
+      console.error('[OutfitPage] 保存失败:', e);
+      Taro.showToast({ title: '保存失败，请重试', icon: 'none' });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleShoeSelect = (shoe: Shoe) => {
@@ -101,6 +129,25 @@ const OutfitPage: React.FC = () => {
 
   const handleViewMonthly = () => {
     Taro.navigateTo({ url: '/pages/monthly-report/index' });
+  };
+
+  const openRecordModal = () => {
+    if (todayRecord) {
+      Taro.showModal({
+        title: '今日已有记录',
+        content: '是否覆盖今日的穿搭记录？',
+        confirmText: '覆盖记录',
+        cancelText: '取消',
+        confirmColor: '#FF6B35',
+        success: (res) => {
+          if (res.confirm) {
+            setShowModal(true);
+          }
+        }
+      });
+    } else {
+      setShowModal(true);
+    }
   };
 
   return (
@@ -130,7 +177,7 @@ const OutfitPage: React.FC = () => {
                 <Text className={styles.recordedTitle}>✅ 今日已记录</Text>
                 <Text className={styles.recordedShoe}>{todayRecord.shoeName}</Text>
                 <Text className={styles.recordedTime}>
-                  {getSceneText(todayRecord.scene)} · {dayjs().format('HH:mm')}
+                  {getSceneText(todayRecord.scene)}
                 </Text>
               </View>
               <View className={styles.recordedBody}>
@@ -138,7 +185,7 @@ const OutfitPage: React.FC = () => {
                   <View className={styles.outfitImageContainer}>
                     <Image
                       className={styles.outfitImage}
-                      src={todayRecord.outfitImage}
+                      src={resolveImagePath(todayRecord.outfitImage)}
                       mode="aspectFill"
                       onError={(e) => console.error('[OutfitPage] 图片加载失败:', e.detail)}
                     />
@@ -148,12 +195,20 @@ const OutfitPage: React.FC = () => {
                   <Text className={styles.notesText}>{todayRecord.notes}</Text>
                 )}
               </View>
+              <View className={styles.recordedActions}>
+                <View className={styles.recordBtnOutline} onClick={openRecordModal}>
+                  重新记录
+                </View>
+                <View className={styles.recordBtnSmall} onClick={handleViewMonthly}>
+                  查看报告
+                </View>
+              </View>
             </View>
           ) : (
             <View className={styles.noRecordCard}>
               <Text className={styles.noRecordIcon}>👟</Text>
               <Text className={styles.noRecordText}>今天还没记录穿了哪双鞋哦</Text>
-              <Button className={styles.recordBtn} onClick={() => setShowModal(true)}>
+              <Button className={styles.recordBtn} onClick={openRecordModal}>
                 记录今日穿搭
               </Button>
             </View>
@@ -190,17 +245,18 @@ const OutfitPage: React.FC = () => {
         </View>
       </View>
 
-      {!todayRecord && (
-        <View className={styles.floatingButton} onClick={() => setShowModal(true)}>
-          +
-        </View>
-      )}
+      {/* 悬浮按钮始终显示 */}
+      <View className={styles.floatingButton} onClick={openRecordModal}>
+        +
+      </View>
 
       {showModal && (
         <View className={styles.modalOverlay} onClick={() => setShowModal(false)}>
           <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <View className={styles.modalHeader}>
-              <Text className={styles.modalTitle}>记录今日穿搭</Text>
+              <Text className={styles.modalTitle}>
+                {todayRecord ? '覆盖今日穿搭' : '记录今日穿搭'}
+              </Text>
             </View>
             <ScrollView className={styles.modalBody} scrollY>
               <View className={styles.formGroup}>
@@ -217,13 +273,14 @@ const OutfitPage: React.FC = () => {
                     >
                       <Image
                         className={styles.shoeSelectImage}
-                        src={shoe.image}
+                        src={resolveImagePath(shoe.image)}
                         mode="aspectFill"
+                        onError={(e) => console.error('[OutfitPage] 图片加载失败:', e)}
                       />
                       <View className={styles.shoeSelectInfo}>
-                        <Text className={styles.shoeSelectName}>{shoe.name}</Text>
+                        <Text className={styles.shoeSelectName}>{shoe.brand} {shoe.name}</Text>
                         <Text className={styles.shoeSelectDesc}>
-                          {shoe.brand} · {getMaterialText(shoe.material)}
+                          {getMaterialText(shoe.material)} · 已穿{shoe.totalWears}次
                         </Text>
                       </View>
                     </View>
@@ -257,6 +314,7 @@ const OutfitPage: React.FC = () => {
                     src={outfitImage}
                     mode="aspectFill"
                     onClick={handleChooseImage}
+                    onError={(e) => console.error('[OutfitPage] 图片加载失败:', e)}
                   />
                 ) : (
                   <View className={styles.imageUploadArea} onClick={handleChooseImage}>
@@ -289,8 +347,10 @@ const OutfitPage: React.FC = () => {
                 className={styles.buttonPrimary}
                 style={{ flex: 2 }}
                 onClick={handleSubmit}
+                loading={isSaving}
+                disabled={isSaving}
               >
-                保存记录
+                {todayRecord ? '覆盖今日记录' : '保存记录'}
               </Button>
             </View>
           </View>

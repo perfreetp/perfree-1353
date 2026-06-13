@@ -13,6 +13,7 @@ import dayjs from 'dayjs';
 import type { CareType } from '@/types';
 import { useShoeStore } from '@/store/useShoeStore';
 import { useCareStore } from '@/store/useCareStore';
+import { resolveImagePath } from '@/utils/storage';
 import styles from './index.module.scss';
 
 const TYPE_OPTIONS: { name: string; value: CareType; icon: string; desc: string }[] = [
@@ -81,7 +82,7 @@ const CareRecordPage: React.FC = () => {
     });
 
     if (careType === 'clean') {
-      markAsCleaned(selectedShoe.id);
+      markAsCleaned(selectedShoe.id, careDate);
     }
 
     Taro.showToast({ title: '登记成功！', icon: 'success' });
@@ -111,7 +112,7 @@ const CareRecordPage: React.FC = () => {
                 >
                   <Image
                     className={styles.shoeOptionImage}
-                    src={shoe.image}
+                    src={resolveImagePath(shoe.image)}
                     mode="aspectFill"
                     onError={(e) => console.error('图片加载失败:', e)}
                   />

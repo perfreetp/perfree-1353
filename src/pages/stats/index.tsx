@@ -14,6 +14,7 @@ import {
   getWearFrequency
 } from '@/utils/stats';
 import { getSceneText } from '@/utils/weather';
+import { resolveImagePath } from '@/utils/storage';
 import StatCard from '@/components/StatCard';
 import styles from './index.module.scss';
 
@@ -189,7 +190,7 @@ const StatsPage: React.FC = () => {
                 </Text>
                 <Image
                   className={styles.rankingImage}
-                  src={shoe.image}
+                  src={resolveImagePath(shoe.image)}
                   mode="aspectFill"
                 />
                 <View className={styles.rankingInfo}>

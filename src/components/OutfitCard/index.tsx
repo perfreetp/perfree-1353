@@ -4,6 +4,7 @@ import classnames from 'classnames';
 import dayjs from 'dayjs';
 import type { OutfitRecord } from '@/types';
 import { getWeatherIcon, getSceneText } from '@/utils/weather';
+import { resolveImagePath } from '@/utils/storage';
 import styles from './index.module.scss';
 
 interface OutfitCardProps {
@@ -28,7 +29,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({ record, showOutfitImage = true 
           <View className={styles.shoeThumbnail}>
             <Image
               className={styles.shoeImage}
-              src={record.shoeImage}
+              src={resolveImagePath(record.shoeImage)}
               mode="aspectFill"
               onError={(e) => console.error('[OutfitCard] 图片加载失败:', e.detail)}
             />
@@ -49,7 +50,7 @@ const OutfitCard: React.FC<OutfitCardProps> = ({ record, showOutfitImage = true 
           <View className={styles.outfitImageContainer}>
             <Image
               className={styles.outfitImage}
-              src={record.outfitImage}
+              src={resolveImagePath(record.outfitImage)}
               mode="aspectFill"
               onError={(e) => console.error('[OutfitCard] 搭配图加载失败:', e.detail)}
             />

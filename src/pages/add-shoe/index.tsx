@@ -12,6 +12,7 @@ import classnames from 'classnames';
 import dayjs from 'dayjs';
 import type { ShoeScene, ShoeMaterial } from '@/types';
 import { useShoeStore } from '@/store/useShoeStore';
+import { saveImagePermanently, resolveImagePath } from '@/utils/storage';
 import styles from './index.module.scss';
 
 const COLOR_OPTIONS = [
@@ -67,6 +68,7 @@ const AddShoePage: React.FC = () => {
   const [selectedScenes, setSelectedScenes] = useState<ShoeScene[]>([]);
   const [notes, setNotes] = useState('');
   const [purchaseDate, setPurchaseDate] = useState(dayjs().format('YYYY-MM-DD'));
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleChooseImage = () => {
     Taro.chooseImage({
@@ -109,7 +111,7 @@ const AddShoePage: React.FC = () => {
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) {
       Taro.showToast({ title: '请填写鞋款名称', icon: 'none' });
       return;
@@ -130,27 +132,46 @@ const AddShoePage: React.FC = () => {
       Taro.showToast({ title: '请选择适用场景', icon: 'none' });
       return;
     }
+    if (isSaving) return;
 
-    const finalImage = image || `https://picsum.photos/seed/${Date.now()}/400/400`;
-    const finalColors = selectedColors.length > 0 ? selectedColors : ['#FFFFFF'];
-    const finalStyle = style || 'casual';
+    setIsSaving(true);
+    Taro.showLoading({ title: '保存中...', mask: true });
 
-    addShoe({
-      name: name.trim(),
-      brand: brand.trim(),
-      image: finalImage,
-      colors: finalColors,
-      style: finalStyle,
-      scene: selectedScenes,
-      material: material as ShoeMaterial,
-      purchaseDate,
-      notes: notes.trim()
-    });
+    try {
+      let savedImage = image;
+      if (image && !image.startsWith('http://') && !image.startsWith('https://')) {
+        savedImage = await saveImagePermanently(image);
+        console.log('[AddShoe] 鞋款照片已转存:', savedImage);
+      }
 
-    Taro.showToast({ title: '添加成功！', icon: 'success' });
-    setTimeout(() => {
-      Taro.navigateBack();
-    }, 800);
+      const finalImage = savedImage || `https://picsum.photos/seed/${Date.now()}/400/400`;
+      const finalColors = selectedColors.length > 0 ? selectedColors : ['#FFFFFF'];
+      const finalStyle = style || 'casual';
+
+      addShoe({
+        name: name.trim(),
+        brand: brand.trim(),
+        image: finalImage,
+        colors: finalColors,
+        style: finalStyle,
+        scene: selectedScenes,
+        material: material as ShoeMaterial,
+        purchaseDate,
+        notes: notes.trim()
+      });
+
+      Taro.hideLoading();
+      Taro.showToast({ title: '添加成功！', icon: 'success' });
+      setTimeout(() => {
+        Taro.navigateBack();
+      }, 800);
+    } catch (e) {
+      Taro.hideLoading();
+      console.error('[AddShoe] 保存失败:', e);
+      Taro.showToast({ title: '保存失败，请重试', icon: 'none' });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -164,7 +185,7 @@ const AddShoePage: React.FC = () => {
         <View className={styles.formCard}>
           <View className={styles.imageUploader} onClick={handleChooseImage}>
             {image ? (
-              <Image className={styles.uploadedImage} src={image} mode="aspectFill" />
+              <Image className={styles.uploadedImage} src={resolveImagePath(image)} mode="aspectFill" />
             ) : (
               <>
                 <Text className={styles.uploadIcon}>📷</Text>

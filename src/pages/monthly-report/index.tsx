@@ -6,6 +6,7 @@ import type { ShoeScene, OutfitRecord } from '@/types';
 import { useOutfitStore } from '@/store/useOutfitStore';
 import { useShoeStore } from '@/store/useShoeStore';
 import { getSceneText, getWeatherIcon } from '@/utils/weather';
+import { resolveImagePath } from '@/utils/storage';
 import styles from './index.module.scss';
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
@@ -149,7 +150,7 @@ const MonthlyReportPage: React.FC = () => {
           <View className={styles.mostWornCard}>
             <Image
               className={styles.mostWornImage}
-              src={reportData.mostWorn.image}
+              src={resolveImagePath(reportData.mostWorn.image)}
               mode="aspectFill"
               onError={(e) => console.error('图片加载失败:', e)}
             />
@@ -217,7 +218,7 @@ const MonthlyReportPage: React.FC = () => {
                   </View>
                   <Image
                     className={styles.dailyImage}
-                    src={record.shoeImage}
+                    src={resolveImagePath(record.shoeImage)}
                     mode="aspectFill"
                     onError={(e) => console.error('图片加载失败:', e)}
                   />

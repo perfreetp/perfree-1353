@@ -12,6 +12,7 @@ import {
   getRecommendedShoes,
   getMaterialText
 } from '@/utils/weather';
+import { resolveImagePath } from '@/utils/storage';
 import WeatherCard from '@/components/WeatherCard';
 import ShoeCard from '@/components/ShoeCard';
 import styles from './index.module.scss';
@@ -160,7 +161,7 @@ const WeatherPage: React.FC = () => {
                 >
                   <Image
                     className={styles.sensitiveImage}
-                    src={shoe.image}
+                    src={resolveImagePath(shoe.image)}
                     mode="aspectFill"
                   />
                   <View className={styles.sensitiveInfo}>

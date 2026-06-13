@@ -17,7 +17,7 @@ interface ShoeStore {
   setSelectedScene: (scene: ShoeScene | 'all') => void;
   getShoeById: (id: string) => Shoe | undefined;
   markAsWorn: (id: string) => void;
-  markAsCleaned: (id: string) => void;
+  markAsCleaned: (id: string, date?: string) => void;
 }
 
 export const useShoeStore = create<ShoeStore>((set, get) => ({
@@ -122,14 +122,14 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
     console.log('[ShoeStore] 标记穿着:', id);
   },
 
-  markAsCleaned: (id) => {
-    const today = new Date().toISOString().split('T')[0];
+  markAsCleaned: (id, date) => {
+    const cleanedDate = date || new Date().toISOString().split('T')[0];
     set((state) => ({
       shoes: state.shoes.map((shoe) =>
-        shoe.id === id ? { ...shoe, lastCleaned: today } : shoe
+        shoe.id === id ? { ...shoe, lastCleaned: cleanedDate } : shoe
       )
     }));
     get().saveToStorage();
-    console.log('[ShoeStore] 标记清洁:', id);
+    console.log('[ShoeStore] 标记清洁:', id, '日期:', cleanedDate);
   }
 }));

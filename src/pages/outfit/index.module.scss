@@ -108,6 +108,39 @@
   border-radius: $radius-md;
 }
 
+.recordedActions {
+  display: flex;
+  gap: $spacing-md;
+  padding: 0 $spacing-lg $spacing-lg;
+}
+
+.recordBtnSmall {
+  flex: 1;
+  height: 72rpx;
+  background: $color-primary;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recordBtnOutline {
+  flex: 1;
+  height: 72rpx;
+  background: transparent;
+  color: $color-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  border: 2rpx solid $color-primary;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .recommendSection {
   margin-bottom: $spacing-lg;
 }

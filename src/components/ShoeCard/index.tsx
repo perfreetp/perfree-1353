@@ -5,6 +5,7 @@ import classnames from 'classnames';
 import type { Shoe } from '@/types';
 import { getSceneText, getMaterialText, isMaterialSensitiveToRain } from '@/utils/weather';
 import { getWearFrequency } from '@/utils/stats';
+import { resolveImagePath } from '@/utils/storage';
 import styles from './index.module.scss';
 
 interface ShoeCardProps {
@@ -31,7 +32,7 @@ const ShoeCard: React.FC<ShoeCardProps> = ({ shoe, showStats = true, onClick }) 
       <View className={styles.imageContainer}>
         <Image
           className={styles.shoeImage}
-          src={shoe.image}
+          src={resolveImagePath(shoe.image)}
           mode="aspectFill"
           onError={(e) => console.error('[ShoeCard] 图片加载失败:', e.detail)}
         />

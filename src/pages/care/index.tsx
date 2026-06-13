@@ -7,6 +7,7 @@ import type { Shoe } from '@/types';
 import { useShoeStore } from '@/store/useShoeStore';
 import { useCareStore } from '@/store/useCareStore';
 import { getShoesNeedingCleaning, getIdleShoes } from '@/utils/stats';
+import { resolveImagePath } from '@/utils/storage';
 import StatCard from '@/components/StatCard';
 import CareCard from '@/components/CareCard';
 import styles from './index.module.scss';
@@ -291,7 +292,7 @@ const CarePage: React.FC = () => {
                   onClick={() => handleAddRecord()}
                 >
                   <Image
-                    src={shoe.image}
+                    src={resolveImagePath(shoe.image)}
                     style={{ width: '80rpx', height: '80rpx', borderRadius: '8rpx' }}
                     mode="aspectFill"
                     onError={(e) => console.error('图片加载失败:', e)}
@@ -402,7 +403,7 @@ const CarePage: React.FC = () => {
                       >
                         <Image
                           className={styles.modalShoeItemImage}
-                          src={shoe.image}
+                          src={resolveImagePath(shoe.image)}
                           mode="aspectFill"
                           onError={(e) => console.error('图片加载失败:', e)}
                         />
