@@ -3,6 +3,7 @@ import Taro from '@tarojs/taro';
 import dayjs from 'dayjs';
 import type { OutfitRecord, WeatherCondition, ShoeScene, MonthlyReport } from '@/types';
 import { mockOutfitRecords } from '@/data/mock';
+import { useShoeStore } from './useShoeStore';
 
 const STORAGE_KEY = 'outfit_store_data';
 
@@ -57,9 +58,32 @@ export const useOutfitStore = create<OutfitStore>((set, get) => ({
       ...recordData,
       id: `outfit-${Date.now()}`
     };
-    set((state) => ({
-      records: [newRecord, ...state.records]
-    }));
+    set((state) => {
+      const sameDayIndex = state.records.findIndex((r) => r.date === newRecord.date);
+      let updatedRecords = [...state.records];
+      
+      if (sameDayIndex !== -1) {
+        const oldRecord = state.records[sameDayIndex];
+        console.log('[OutfitStore] 同一天已有记录，替换旧记录:', oldRecord.date, oldRecord.shoeName, '→', newRecord.shoeName);
+        
+        if (oldRecord.shoeId !== newRecord.shoeId) {
+          const shoeStore = useShoeStore.getState();
+          const oldShoe = shoeStore.shoes.find((s) => s.id === oldRecord.shoeId);
+          if (oldShoe && oldShoe.totalWears > 0) {
+            shoeStore.updateShoe(oldRecord.shoeId, {
+              totalWears: oldShoe.totalWears - 1
+            });
+            console.log('[OutfitStore] 旧鞋穿着次数-1:', oldShoe.name);
+          }
+        }
+        
+        updatedRecords = state.records.filter((r) => r.date !== newRecord.date);
+      }
+      
+      return {
+        records: [newRecord, ...updatedRecords]
+      };
+    });
     get().saveToStorage();
     console.log('[OutfitStore] 添加穿搭记录:', newRecord.date, newRecord.shoeName);
   },

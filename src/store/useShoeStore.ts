@@ -125,11 +125,23 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
   markAsCleaned: (id, date) => {
     const cleanedDate = date || new Date().toISOString().split('T')[0];
     set((state) => ({
-      shoes: state.shoes.map((shoe) =>
-        shoe.id === id ? { ...shoe, lastCleaned: cleanedDate } : shoe
-      )
+      shoes: state.shoes.map((shoe) => {
+        if (shoe.id !== id) return shoe;
+        
+        if (!shoe.lastCleaned) {
+          console.log('[ShoeStore] 首次标记清洁:', id, '日期:', cleanedDate);
+          return { ...shoe, lastCleaned: cleanedDate };
+        }
+        
+        if (cleanedDate >= shoe.lastCleaned) {
+          console.log('[ShoeStore] 更新清洁日期:', id, shoe.lastCleaned, '→', cleanedDate);
+          return { ...shoe, lastCleaned: cleanedDate };
+        }
+        
+        console.log('[ShoeStore] 补录历史清洁记录，不更新 lastCleaned:', id, '已有:', shoe.lastCleaned, '新记录:', cleanedDate);
+        return shoe;
+      })
     }));
     get().saveToStorage();
-    console.log('[ShoeStore] 标记清洁:', id, '日期:', cleanedDate);
   }
 }));

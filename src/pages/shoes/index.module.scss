@@ -7,16 +7,190 @@
 
 .headerSection {
   margin-bottom: $spacing-lg;
+  position: relative;
+}
+
+.searchBar {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  align-items: center;
+}
+
+.searchInputContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: 0 $spacing-md;
+  height: $button-height-lg;
+  box-shadow: $shadow-card;
+}
+
+.searchIcon {
+  font-size: 32rpx;
+  margin-right: $spacing-sm;
+  opacity: 0.6;
+}
+
+.searchInput {
+  flex: 1;
+  height: 100%;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
+
+.searchClear {
+  font-size: 36rpx;
+  color: $color-text-tertiary;
+  padding: $spacing-xs;
+  font-weight: $font-weight-bold;
+}
+
+.filterToggle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 0 $spacing-md;
+  height: $button-height-lg;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  box-shadow: $shadow-card;
+  position: relative;
+
+  &.filterActive {
+    background: linear-gradient(135deg, $color-primary-light 0%, rgba(255, 107, 53, 0.1) 100%);
+    color: $color-primary;
+  }
+}
+
+.filterBadge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  background: $color-primary;
+  color: $color-text-white;
+  border-radius: 16rpx;
+  font-size: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8rpx;
+  font-weight: $font-weight-bold;
+}
+
+.filterArrow {
+  font-size: 20rpx;
+  opacity: 0.7;
+}
+
+.filterPanel {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.filterRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.filterLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.clearFilters {
+  font-size: $font-size-sm;
+  color: $color-primary;
+}
+
+.filterButtonsRow {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.filterButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  height: $button-height-md;
+  background: $color-bg-secondary;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  &.filterButtonActive {
+    background: $color-primary;
+    color: $color-text-white;
+  }
+}
+
+.filterButtonArrow {
+  font-size: 18rpx;
+  opacity: 0.7;
+}
+
+.filterDropdown {
+  background: $color-bg-secondary;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-md;
+  overflow: hidden;
+}
+
+.filterDropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  border-bottom: 1rpx solid $color-border-light;
+  transition: background $transition-base;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.filterDropdownItemActive {
+    background: rgba(255, 107, 53, 0.08);
+    color: $color-primary;
+  }
+}
+
+.filterDropdownCount {
+  color: $color-text-tertiary;
+  font-size: 24rpx;
+  margin-left: auto;
+  margin-right: $spacing-sm;
+}
+
+.filterCheck {
+  color: $color-primary;
+  font-weight: $font-weight-bold;
+  font-size: 32rpx;
 }
 
 .filterTabs {
   display: flex;
   gap: $spacing-sm;
-  margin-bottom: $spacing-lg;
-  background: $color-bg-card;
+  background: $color-bg-secondary;
   padding: $spacing-sm;
   border-radius: $radius-lg;
-  box-shadow: $shadow-card;
 }
 
 .filterTab {
@@ -35,6 +209,32 @@
     background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
     color: $color-text-white;
   }
+}
+
+.activeFiltersRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.activeFilterTag {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-md;
+  background: linear-gradient(135deg, $color-primary-light 0%, rgba(255, 107, 53, 0.1) 100%);
+  border-radius: $radius-round;
+  font-size: 24rpx;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.filterTagClose {
+  font-size: 28rpx;
+  font-weight: $font-weight-bold;
+  opacity: 0.7;
+  margin-left: 4rpx;
 }
 
 .statsRow {
@@ -94,8 +294,25 @@
 
 .sortSelector {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: $spacing-md;
+}
+
+.resultCount {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.resultCountNum {
+  color: $color-primary;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-md;
+}
+
+.resultCountHint {
+  font-size: 24rpx;
+  color: $color-text-tertiary;
 }
 
 .sortButton {
