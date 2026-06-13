@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, Button, Image, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
-import { useShoeStore } from '@/store/useShoeStore';
+import { useShoeStore, FilterPreset } from '@/store/useShoeStore';
 import { getSceneText, getMaterialText } from '@/utils/weather';
 import { getIdleShoes, getTotalWears } from '@/utils/stats';
 import ShoeCard from '@/components/ShoeCard';
@@ -12,8 +12,10 @@ import styles from './index.module.scss';
 
 type SortType = 'recent' | 'wears' | 'idle';
 
+const PRESET_ICONS = ['💼', '🌧️', '🏃', '🎨', '🏖️', '👟', '⭐', '🔧'];
+
 const ShoesPage: React.FC = () => {
-  const { shoes, selectedScene, setSelectedScene } = useShoeStore();
+  const { shoes, selectedScene, setSelectedScene, filterPresets, addFilterPreset, deleteFilterPreset } = useShoeStore();
   const [sortType, setSortType] = useState<SortType>('recent');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
@@ -22,6 +24,9 @@ const ShoesPage: React.FC = () => {
   const [selectedMaterial, setSelectedMaterial] = useState<ShoeMaterial | 'all'>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilterDropdown, setActiveFilterDropdown] = useState<'brand' | 'material' | null>(null);
+  const [showSavePreset, setShowSavePreset] = useState(false);
+  const [presetName, setPresetName] = useState('');
+  const [presetIcon, setPresetIcon] = useState('💼');
 
   const idleShoes = useMemo(() => getIdleShoes(shoes, 7), [shoes]);
   const totalWears = useMemo(() => getTotalWears(shoes), [shoes]);
@@ -95,6 +100,47 @@ const ShoesPage: React.FC = () => {
     setSelectedScene('all');
     setActiveFilterDropdown(null);
   }, [setSelectedScene]);
+
+  const applyPreset = useCallback((preset: FilterPreset) => {
+    setSearchQuery(preset.searchQuery);
+    setSelectedBrand(preset.brand);
+    setSelectedMaterial(preset.material);
+    setSelectedScene(preset.scene);
+    setActiveFilterDropdown(null);
+    Taro.showToast({ title: `已应用「${preset.name}」`, icon: 'none' });
+  }, [setSelectedScene]);
+
+  const handleSavePreset = useCallback(() => {
+    if (!presetName.trim()) {
+      Taro.showToast({ title: '请输入方案名称', icon: 'none' });
+      return;
+    }
+    addFilterPreset({
+      name: presetName.trim(),
+      icon: presetIcon,
+      brand: selectedBrand,
+      material: selectedMaterial,
+      scene: selectedScene,
+      searchQuery
+    });
+    setShowSavePreset(false);
+    setPresetName('');
+    setPresetIcon('💼');
+    Taro.showToast({ title: '方案已保存', icon: 'success' });
+  }, [presetName, presetIcon, selectedBrand, selectedMaterial, selectedScene, searchQuery, addFilterPreset]);
+
+  const handleDeletePreset = useCallback((id: string, name: string) => {
+    Taro.showModal({
+      title: '删除方案',
+      content: `确定删除「${name}」方案？`,
+      confirmColor: '#FF3B30',
+      success: (res) => {
+        if (res.confirm) {
+          deleteFilterPreset(id);
+        }
+      }
+    });
+  }, [deleteFilterPreset]);
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
@@ -323,6 +369,100 @@ const ShoesPage: React.FC = () => {
                     </Text>
                   </View>
                 ))}
+              </View>
+
+              {filterPresets.length > 0 && (
+                <View className={styles.presetSection}>
+                  <View className={styles.presetRow}>
+                    <Text className={styles.presetLabel}>常用方案</Text>
+                    {activeFilterCount > 0 && (
+                      <Text className={styles.savePresetBtn} onClick={() => setShowSavePreset(true)}>
+                        💾 存为方案
+                      </Text>
+                    )}
+                  </View>
+                  <ScrollView className={styles.presetScroll} scrollX showScrollbar={false}>
+                    <View className={styles.presetList}>
+                      {filterPresets.map((preset) => (
+                        <View
+                          key={preset.id}
+                          className={styles.presetCard}
+                          onClick={() => applyPreset(preset)}
+                          onLongPress={() => handleDeletePreset(preset.id, preset.name)}
+                        >
+                          <Text className={styles.presetIcon}>{preset.icon}</Text>
+                          <Text className={styles.presetName}>{preset.name}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </ScrollView>
+                </View>
+              )}
+
+              {filterPresets.length === 0 && activeFilterCount > 0 && (
+                <View className={styles.presetSection}>
+                  <View className={styles.presetRow}>
+                    <Text className={styles.presetLabel}>常用方案</Text>
+                    <Text className={styles.savePresetBtn} onClick={() => setShowSavePreset(true)}>
+                      💾 存为方案
+                    </Text>
+                  </View>
+                  <Text className={styles.presetHint}>保存当前筛选条件，下次一键套用</Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {showSavePreset && (
+            <View className={styles.savePresetOverlay} onClick={() => setShowSavePreset(false)}>
+              <View className={styles.savePresetPanel} onClick={(e) => e.stopPropagation()}>
+                <Text className={styles.savePresetTitle}>保存筛选方案</Text>
+                <View className={styles.savePresetForm}>
+                  <View className={styles.savePresetFormItem}>
+                    <Text className={styles.savePresetLabel}>图标</Text>
+                    <View className={styles.iconOptions}>
+                      {PRESET_ICONS.map((icon) => (
+                        <View
+                          key={icon}
+                          className={classnames(styles.iconOption, {
+                            [styles.iconOptionActive]: presetIcon === icon
+                          })}
+                          onClick={() => setPresetIcon(icon)}
+                        >
+                          {icon}
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                  <View className={styles.savePresetFormItem}>
+                    <Text className={styles.savePresetLabel}>方案名称</Text>
+                    <Input
+                      className={styles.savePresetInput}
+                      placeholder="如：上班通勤、雨天避开麂皮"
+                      placeholderStyle="color: #86909C"
+                      value={presetName}
+                      onInput={(e) => setPresetName(e.detail.value)}
+                    />
+                  </View>
+                  <View className={styles.savePresetFormItem}>
+                    <Text className={styles.savePresetLabel}>当前筛选</Text>
+                    <Text className={styles.savePresetSummary}>
+                      {searchQuery && `🔍${searchQuery} `}
+                      {selectedBrand !== 'all' && `🏷️${selectedBrand} `}
+                      {selectedMaterial !== 'all' && `🧵${getMaterialText(selectedMaterial as ShoeMaterial)} `}
+                      {selectedScene !== 'all' && `📍${getSceneText(selectedScene)}`}
+                      {activeFilterCount === 0 && '无筛选条件'}
+                    </Text>
+                  </View>
+                </View>
+                <View className={styles.savePresetActions}>
+                  <View className={styles.savePresetCancel} onClick={() => setShowSavePreset(false)}>
+                    取消
+                  </View>
+                  <View className={styles.savePresetConfirm} onClick={handleSavePreset}>
+                    保存方案
+                  </View>
+                </View>
               </View>
             </View>
           )}

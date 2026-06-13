@@ -579,3 +579,78 @@
   color: #FF9800;
   line-height: 1.6;
 }
+
+.recordItemEditable {
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:active {
+    background: $color-bg-secondary;
+  }
+}
+
+.recordEditHint {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.shoeSelectList {
+  background: $color-bg-secondary;
+  border-radius: $radius-md;
+  padding: $spacing-sm;
+}
+
+.shoeSelectItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-sm;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.shoeSelectItemActive {
+  border-color: $color-primary;
+  background: rgba($color-primary, 0.05);
+}
+
+.shoeSelectImage {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.shoeSelectInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.shoeSelectName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.shoeSelectDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.modalBtnDelete {
+  flex: 1;
+  height: 88rpx;
+  background: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+}

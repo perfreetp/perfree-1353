@@ -347,3 +347,190 @@
   font-size: $font-size-lg;
   font-weight: $font-weight-bold;
 }
+
+.presetSection {
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-border-light;
+}
+
+.presetRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.presetLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.presetHint {
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+}
+
+.savePresetBtn {
+  font-size: 24rpx;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.presetScroll {
+  width: 100%;
+}
+
+.presetList {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.presetCard {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-md;
+  background: $color-bg-secondary;
+  border-radius: $radius-round;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+}
+
+.presetIcon {
+  font-size: 28rpx;
+}
+
+.presetName {
+  font-weight: $font-weight-medium;
+}
+
+.savePresetOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.savePresetPanel {
+  width: 85%;
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  padding: $spacing-lg;
+  box-shadow: $shadow-popup;
+}
+
+.savePresetTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+  display: block;
+  text-align: center;
+}
+
+.savePresetForm {
+  margin-bottom: $spacing-lg;
+}
+
+.savePresetFormItem {
+  margin-bottom: $spacing-md;
+}
+
+.savePresetLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.iconOptions {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.iconOption {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-bg-secondary;
+  border-radius: $radius-md;
+  font-size: 32rpx;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &.iconOptionActive {
+    border-color: $color-primary;
+    background: rgba(255, 107, 53, 0.1);
+  }
+}
+
+.savePresetInput {
+  width: 100%;
+  height: 80rpx;
+  background: $color-bg-secondary;
+  border-radius: $radius-md;
+  padding: 0 $spacing-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  border: none;
+  box-sizing: border-box;
+}
+
+.savePresetSummary {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  line-height: 1.6;
+  padding: $spacing-md;
+  background: $color-bg-secondary;
+  border-radius: $radius-md;
+  display: block;
+}
+
+.savePresetActions {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.savePresetCancel {
+  flex: 1;
+  height: 80rpx;
+  background: $color-bg-secondary;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.savePresetConfirm {
+  flex: 2;
+  height: 80rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+}

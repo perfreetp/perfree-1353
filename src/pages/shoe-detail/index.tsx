@@ -9,7 +9,7 @@ import {
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import dayjs from 'dayjs';
-import type { ShoeScene, ShoeMaterial, CareRecord } from '@/types';
+import type { ShoeScene, ShoeMaterial, CareRecord, CareType } from '@/types';
 import { useShoeStore } from '@/store/useShoeStore';
 import { useOutfitStore } from '@/store/useOutfitStore';
 import { useCareStore } from '@/store/useCareStore';
@@ -74,9 +74,9 @@ const ShoeDetailPage: React.FC = () => {
   const router = Taro.useRouter();
   const shoeId = router.params?.id as string;
 
-  const { shoes, updateShoe, deleteShoe } = useShoeStore();
-  const { records: outfitRecords } = useOutfitStore();
-  const { careRecords } = useCareStore();
+  const { shoes, updateShoe, deleteShoe, markAsCleaned } = useShoeStore();
+  const { records: outfitRecords, updateRecord, deleteRecord } = useOutfitStore();
+  const { careRecords, updateCareRecord, deleteCareRecord } = useCareStore();
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editBrand, setEditBrand] = useState('');
@@ -89,6 +89,19 @@ const ShoeDetailPage: React.FC = () => {
   const [editPurchaseDate, setEditPurchaseDate] = useState('');
   const [editNotes, setEditNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  const [showEditOutfitModal, setShowEditOutfitModal] = useState(false);
+  const [editOutfitId, setEditOutfitId] = useState('');
+  const [editOutfitShoeId, setEditOutfitShoeId] = useState('');
+  const [editOutfitScene, setEditOutfitScene] = useState<ShoeScene>('commute');
+  const [editOutfitNotes, setEditOutfitNotes] = useState('');
+
+  const [showEditCareModal, setShowEditCareModal] = useState(false);
+  const [editCareId, setEditCareId] = useState('');
+  const [editCareType, setEditCareType] = useState<CareType>('clean');
+  const [editCareDate, setEditCareDate] = useState('');
+  const [editCareProducts, setEditCareProducts] = useState<string[]>([]);
+  const [editCareNotes, setEditCareNotes] = useState('');
 
   const shoe = useMemo(() => shoes.find((s) => s.id === shoeId), [shoes, shoeId]);
 
@@ -256,6 +269,84 @@ const ShoeDetailPage: React.FC = () => {
     Taro.navigateTo({ url: '/pages/care-record/index' });
   };
 
+  const handleOutfitRecordClick = (record: typeof shoeOutfitRecords[number]) => {
+    setEditOutfitId(record.id);
+    setEditOutfitShoeId(record.shoeId);
+    setEditOutfitScene(record.scene);
+    setEditOutfitNotes(record.notes || '');
+    setShowEditOutfitModal(true);
+  };
+
+  const handleCareRecordClick = (record: typeof shoeCareRecords[number]) => {
+    setEditCareId(record.id);
+    setEditCareType(record.type as CareType);
+    setEditCareDate(record.date);
+    setEditCareProducts(record.products ? [...record.products] : []);
+    setEditCareNotes(record.notes || '');
+    setShowEditCareModal(true);
+  };
+
+  const handleSaveOutfitEdit = () => {
+    const updates: Partial<Omit<import('@/types').OutfitRecord, 'id'>> = {
+      shoeId: editOutfitShoeId,
+      shoeName: true as any,
+      scene: editOutfitScene,
+      notes: editOutfitNotes
+    };
+    updateRecord(editOutfitId, updates);
+    Taro.showToast({ title: '修改成功', icon: 'success' });
+    setShowEditOutfitModal(false);
+  };
+
+  const handleDeleteOutfitRecord = () => {
+    Taro.showModal({
+      title: '删除穿搭记录',
+      content: '确定要删除这条穿搭记录吗？',
+      confirmText: '删除',
+      cancelText: '取消',
+      confirmColor: '#FF3B30',
+      success: (res) => {
+        if (res.confirm) {
+          deleteRecord(editOutfitId);
+          Taro.showToast({ title: '已删除', icon: 'success' });
+          setShowEditOutfitModal(false);
+        }
+      }
+    });
+  };
+
+  const handleSaveCareEdit = () => {
+    const oldRecord = careRecords.find((r) => r.id === editCareId);
+    updateCareRecord(editCareId, {
+      type: editCareType,
+      date: editCareDate,
+      products: editCareProducts,
+      notes: editCareNotes
+    });
+    if (editCareType === 'clean' && oldRecord && editCareDate !== oldRecord.date) {
+      markAsCleaned(shoeId, editCareDate);
+    }
+    Taro.showToast({ title: '修改成功', icon: 'success' });
+    setShowEditCareModal(false);
+  };
+
+  const handleDeleteCareRecord = () => {
+    Taro.showModal({
+      title: '删除保养记录',
+      content: '确定要删除这条保养记录吗？',
+      confirmText: '删除',
+      cancelText: '取消',
+      confirmColor: '#FF3B30',
+      success: (res) => {
+        if (res.confirm) {
+          deleteCareRecord(editCareId);
+          Taro.showToast({ title: '已删除', icon: 'success' });
+          setShowEditCareModal(false);
+        }
+      }
+    });
+  };
+
   const isSensitive = isMaterialSensitiveToRain(shoe.material);
   const lastCleanedDays = shoe.lastCleaned
     ? dayjs().diff(dayjs(shoe.lastCleaned), 'day')
@@ -407,7 +498,7 @@ const ShoeDetailPage: React.FC = () => {
             shoeOutfitRecords.map((record) => {
               const d = dayjs(record.date);
               return (
-                <View key={record.id} className={styles.recordItem}>
+                <View key={record.id} className={classnames(styles.recordItem, styles.recordItemEditable)} onClick={() => handleOutfitRecordClick(record)}>
                   <View className={styles.recordDate}>
                     <Text className={styles.recordDay}>{d.format('D')}</Text>
                     <Text className={styles.recordMonth}>{d.format('M月')}</Text>
@@ -424,6 +515,7 @@ const ShoeDetailPage: React.FC = () => {
                       <Text>🌡️ {record.temperature}°C</Text>
                     </View>
                   </View>
+                  <Text className={styles.recordEditHint}>编辑 ›</Text>
                 </View>
               );
             })
@@ -446,7 +538,7 @@ const ShoeDetailPage: React.FC = () => {
               const d = dayjs(record.date);
               const typeInfo = CARE_TYPE_TEXT[record.type] || { text: '保养', icon: '📦' };
               return (
-                <View key={record.id} className={styles.recordItem}>
+                <View key={record.id} className={classnames(styles.recordItem, styles.recordItemEditable)} onClick={() => handleCareRecordClick(record)}>
                   <View className={styles.recordDate}>
                     <Text className={styles.recordDay}>{d.format('D')}</Text>
                     <Text className={styles.recordMonth}>{d.format('M月')}</Text>
@@ -465,6 +557,7 @@ const ShoeDetailPage: React.FC = () => {
                       )}
                     </View>
                   </View>
+                  <Text className={styles.recordEditHint}>编辑 ›</Text>
                 </View>
               );
             })
@@ -653,6 +746,165 @@ const ShoeDetailPage: React.FC = () => {
                 取消
               </View>
               <View className={styles.modalBtnSave} onClick={handleSaveEdit}>
+                保存修改
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {showEditOutfitModal && (
+        <View className={styles.modalOverlay} onClick={() => setShowEditOutfitModal(false)}>
+          <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <View className={styles.modalHeader}>
+              <Text className={styles.modalTitle}>编辑穿搭记录</Text>
+              <Text className={styles.modalClose} onClick={() => setShowEditOutfitModal(false)}>
+                ×
+              </Text>
+            </View>
+
+            <ScrollView className={styles.modalBody} scrollY>
+              <View className={styles.modalFormItem}>
+                <Text className={styles.modalFormLabel}>选择鞋款</Text>
+                <ScrollView className={styles.shoeSelectList} scrollY style={{ maxHeight: '400rpx' }}>
+                  {shoes.map((s) => (
+                    <View
+                      key={s.id}
+                      className={classnames(styles.shoeSelectItem, {
+                        [styles.shoeSelectItemActive]: editOutfitShoeId === s.id
+                      })}
+                      onClick={() => setEditOutfitShoeId(s.id)}
+                    >
+                      <Image
+                        className={styles.shoeSelectImage}
+                        src={resolveImagePath(s.image)}
+                        mode="aspectFill"
+                      />
+                      <View className={styles.shoeSelectInfo}>
+                        <Text className={styles.shoeSelectName}>{s.brand} {s.name}</Text>
+                        <Text className={styles.shoeSelectDesc}>
+                          {getMaterialText(s.material)} · 已穿{s.totalWears}次
+                        </Text>
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+
+              <View className={styles.modalFormItem}>
+                <Text className={styles.modalFormLabel}>场景</Text>
+                <View className={styles.multiOptionsRow}>
+                  {SCENE_OPTIONS.map((opt) => (
+                    <View
+                      key={opt.value}
+                      className={classnames(styles.multiOptionItem, {
+                        [styles.multiOptionItemActive]: editOutfitScene === opt.value
+                      })}
+                      onClick={() => setEditOutfitScene(opt.value)}
+                    >
+                      {opt.name}
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              <View className={styles.modalFormItem}>
+                <Text className={styles.modalFormLabel}>备注</Text>
+                <Input
+                  className={styles.modalInput}
+                  placeholder="备注信息"
+                  placeholderStyle="color: #86909C"
+                  value={editOutfitNotes}
+                  onInput={(e) => setEditOutfitNotes(e.detail.value)}
+                />
+              </View>
+            </ScrollView>
+
+            <View className={styles.modalFooter}>
+              <View className={styles.modalBtnDelete} onClick={handleDeleteOutfitRecord}>
+                删除
+              </View>
+              <View className={styles.modalBtnCancel} onClick={() => setShowEditOutfitModal(false)}>
+                取消
+              </View>
+              <View className={styles.modalBtnSave} onClick={handleSaveOutfitEdit}>
+                保存修改
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {showEditCareModal && (
+        <View className={styles.modalOverlay} onClick={() => setShowEditCareModal(false)}>
+          <View className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <View className={styles.modalHeader}>
+              <Text className={styles.modalTitle}>编辑保养记录</Text>
+              <Text className={styles.modalClose} onClick={() => setShowEditCareModal(false)}>
+                ×
+              </Text>
+            </View>
+
+            <ScrollView className={styles.modalBody} scrollY>
+              <View className={styles.modalFormItem}>
+                <Text className={styles.modalFormLabel}>保养类型</Text>
+                <View className={styles.multiOptionsRow}>
+                  {Object.entries(CARE_TYPE_TEXT).map(([key, info]) => (
+                    <View
+                      key={key}
+                      className={classnames(styles.multiOptionItem, {
+                        [styles.multiOptionItemActive]: editCareType === key
+                      })}
+                      onClick={() => setEditCareType(key as CareType)}
+                    >
+                      {info.icon} {info.text}
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              <View className={styles.modalFormItem}>
+                <Text className={styles.modalFormLabel}>日期</Text>
+                <Input
+                  className={styles.modalInput}
+                  placeholder="请输入日期 (YYYY-MM-DD)"
+                  placeholderStyle="color: #86909C"
+                  value={editCareDate}
+                  onInput={(e) => setEditCareDate(e.detail.value)}
+                />
+              </View>
+
+              <View className={styles.modalFormItem}>
+                <Text className={styles.modalFormLabel}>使用产品</Text>
+                <Input
+                  className={styles.modalInput}
+                  placeholder="多个产品用逗号分隔"
+                  placeholderStyle="color: #86909C"
+                  value={editCareProducts.join('、')}
+                  onInput={(e) => setEditCareProducts(e.detail.value.split(/[、,，]/).map((s: string) => s.trim()).filter(Boolean))}
+                />
+              </View>
+
+              <View className={styles.modalFormItem}>
+                <Text className={styles.modalFormLabel}>备注</Text>
+                <Input
+                  className={styles.modalInput}
+                  placeholder="备注信息"
+                  placeholderStyle="color: #86909C"
+                  value={editCareNotes}
+                  onInput={(e) => setEditCareNotes(e.detail.value)}
+                />
+              </View>
+            </ScrollView>
+
+            <View className={styles.modalFooter}>
+              <View className={styles.modalBtnDelete} onClick={handleDeleteCareRecord}>
+                删除
+              </View>
+              <View className={styles.modalBtnCancel} onClick={() => setShowEditCareModal(false)}>
+                取消
+              </View>
+              <View className={styles.modalBtnSave} onClick={handleSaveCareEdit}>
                 保存修改
               </View>
             </View>

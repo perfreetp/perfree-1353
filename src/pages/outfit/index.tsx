@@ -104,7 +104,9 @@ const OutfitPage: React.FC = () => {
         notes
       });
 
-      useShoeStore.getState().markAsWorn(selectedShoe.id);
+      if (!todayRecord) {
+        useShoeStore.getState().markAsWorn(selectedShoe.id);
+      }
 
       setShowModal(false);
       setSelectedShoe(null);

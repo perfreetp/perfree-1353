@@ -1,13 +1,24 @@
 import { create } from 'zustand';
 import Taro from '@tarojs/taro';
-import type { Shoe, ShoeScene } from '@/types';
+import type { Shoe, ShoeScene, ShoeMaterial } from '@/types';
 import { mockShoes } from '@/data/mock';
 
 const STORAGE_KEY = 'shoe_store_data';
 
+export interface FilterPreset {
+  id: string;
+  name: string;
+  icon: string;
+  brand: string;
+  material: ShoeMaterial | 'all';
+  scene: ShoeScene | 'all';
+  searchQuery: string;
+}
+
 interface ShoeStore {
   shoes: Shoe[];
   selectedScene: ShoeScene | 'all';
+  filterPresets: FilterPreset[];
   isInitialized: boolean;
   initFromStorage: () => void;
   saveToStorage: () => void;
@@ -18,11 +29,14 @@ interface ShoeStore {
   getShoeById: (id: string) => Shoe | undefined;
   markAsWorn: (id: string) => void;
   markAsCleaned: (id: string, date?: string) => void;
+  addFilterPreset: (preset: Omit<FilterPreset, 'id'>) => void;
+  deleteFilterPreset: (id: string) => void;
 }
 
 export const useShoeStore = create<ShoeStore>((set, get) => ({
   shoes: mockShoes,
   selectedScene: 'all',
+  filterPresets: [],
   isInitialized: false,
 
   initFromStorage: () => {
@@ -32,6 +46,7 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
         set({
           shoes: stored.shoes,
           selectedScene: stored.selectedScene || 'all',
+          filterPresets: stored.filterPresets || [],
           isInitialized: true
         });
         console.log('[ShoeStore] 从本地存储加载:', stored.shoes.length, '双鞋');
@@ -51,7 +66,8 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
       const state = get();
       Taro.setStorageSync(STORAGE_KEY, {
         shoes: state.shoes,
-        selectedScene: state.selectedScene
+        selectedScene: state.selectedScene,
+        filterPresets: state.filterPresets
       });
     } catch (e) {
       console.error('[ShoeStore] 保存本地存储失败:', e);
@@ -143,5 +159,25 @@ export const useShoeStore = create<ShoeStore>((set, get) => ({
       })
     }));
     get().saveToStorage();
+  },
+
+  addFilterPreset: (preset) => {
+    const newPreset: FilterPreset = {
+      ...preset,
+      id: `preset-${Date.now()}`
+    };
+    set((state) => ({
+      filterPresets: [...state.filterPresets, newPreset]
+    }));
+    get().saveToStorage();
+    console.log('[ShoeStore] 添加筛选方案:', newPreset.name);
+  },
+
+  deleteFilterPreset: (id) => {
+    set((state) => ({
+      filterPresets: state.filterPresets.filter((p) => p.id !== id)
+    }));
+    get().saveToStorage();
+    console.log('[ShoeStore] 删除筛选方案:', id);
   }
 }));

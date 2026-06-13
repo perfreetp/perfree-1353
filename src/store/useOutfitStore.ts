@@ -13,9 +13,20 @@ interface OutfitStore {
   initFromStorage: () => void;
   saveToStorage: () => void;
   addRecord: (record: Omit<OutfitRecord, 'id'>) => void;
+  updateRecord: (id: string, updates: Partial<Omit<OutfitRecord, 'id'>>) => void;
+  deleteRecord: (id: string) => void;
   getTodayRecord: () => OutfitRecord | undefined;
   getRecordsByMonth: (yearMonth: string) => OutfitRecord[];
+  getRecordsByWeek: (weekStart: string) => OutfitRecord[];
   generateMonthlyReport: (yearMonth: string) => MonthlyReport;
+  generateWeeklyReport: (weekStart: string) => {
+    weekStart: string;
+    weekEnd: string;
+    totalWears: number;
+    missedDays: number;
+    mostWorn: { shoeId: string; shoeName: string; shoeImage?: string; count: number } | null;
+    dailyRecords: { date: string; weekday: number; record: OutfitRecord | null }[];
+  };
 }
 
 export const useOutfitStore = create<OutfitStore>((set, get) => ({
@@ -61,11 +72,11 @@ export const useOutfitStore = create<OutfitStore>((set, get) => ({
     set((state) => {
       const sameDayIndex = state.records.findIndex((r) => r.date === newRecord.date);
       let updatedRecords = [...state.records];
-      
+
       if (sameDayIndex !== -1) {
         const oldRecord = state.records[sameDayIndex];
         console.log('[OutfitStore] 同一天已有记录，替换旧记录:', oldRecord.date, oldRecord.shoeName, '→', newRecord.shoeName);
-        
+
         if (oldRecord.shoeId !== newRecord.shoeId) {
           const shoeStore = useShoeStore.getState();
           const oldShoe = shoeStore.shoes.find((s) => s.id === oldRecord.shoeId);
@@ -75,17 +86,94 @@ export const useOutfitStore = create<OutfitStore>((set, get) => ({
             });
             console.log('[OutfitStore] 旧鞋穿着次数-1:', oldShoe.name);
           }
+          const existingNewShoe = shoeStore.shoes.find((s) => s.id === newRecord.shoeId);
+          if (existingNewShoe) {
+            const newCount = (existingNewShoe.totalWears || 0) + 1;
+            shoeStore.updateShoe(newRecord.shoeId, {
+              totalWears: newCount,
+              lastWorn: newRecord.date,
+              isIdle: false,
+              idleDays: 0
+            });
+            console.log('[OutfitStore] 新鞋穿着次数+1:', existingNewShoe.name, '→', newCount);
+          }
+        } else {
+          const shoeStore = useShoeStore.getState();
+          shoeStore.updateShoe(newRecord.shoeId, {
+            lastWorn: newRecord.date,
+            isIdle: false,
+            idleDays: 0
+          });
         }
-        
+
         updatedRecords = state.records.filter((r) => r.date !== newRecord.date);
       }
-      
+
       return {
         records: [newRecord, ...updatedRecords]
       };
     });
     get().saveToStorage();
     console.log('[OutfitStore] 添加穿搭记录:', newRecord.date, newRecord.shoeName);
+  },
+
+  updateRecord: (id, updates) => {
+    const state = get();
+    const oldRecord = state.records.find((r) => r.id === id);
+    if (!oldRecord) return;
+
+    const newShoeId = updates.shoeId || oldRecord.shoeId;
+    const shoeStore = useShoeStore.getState();
+
+    if (updates.shoeId && updates.shoeId !== oldRecord.shoeId) {
+      const oldShoe = shoeStore.shoes.find((s) => s.id === oldRecord.shoeId);
+      if (oldShoe && oldShoe.totalWears > 0) {
+        shoeStore.updateShoe(oldRecord.shoeId, { totalWears: oldShoe.totalWears - 1 });
+      }
+      const newShoe = shoeStore.shoes.find((s) => s.id === updates.shoeId);
+      if (newShoe) {
+        shoeStore.updateShoe(updates.shoeId, {
+          totalWears: newShoe.totalWears + 1,
+          lastWorn: updates.date || oldRecord.date,
+          isIdle: false,
+          idleDays: 0
+        });
+      }
+    }
+
+    if (updates.shoeName) {
+      const shoe = shoeStore.shoes.find((s) => s.id === newShoeId);
+      if (shoe) {
+        updates.shoeName = `${shoe.brand} ${shoe.name}`;
+        updates.shoeImage = shoe.image;
+      }
+    }
+
+    set((state) => ({
+      records: state.records.map((r) =>
+        r.id === id ? { ...r, ...updates } : r
+      )
+    }));
+    get().saveToStorage();
+    console.log('[OutfitStore] 更新穿搭记录:', id);
+  },
+
+  deleteRecord: (id) => {
+    const state = get();
+    const record = state.records.find((r) => r.id === id);
+    if (!record) return;
+
+    const shoeStore = useShoeStore.getState();
+    const shoe = shoeStore.shoes.find((s) => s.id === record.shoeId);
+    if (shoe && shoe.totalWears > 0) {
+      shoeStore.updateShoe(record.shoeId, { totalWears: shoe.totalWears - 1 });
+    }
+
+    set((state) => ({
+      records: state.records.filter((r) => r.id !== id)
+    }));
+    get().saveToStorage();
+    console.log('[OutfitStore] 删除穿搭记录:', id);
   },
 
   getTodayRecord: () => {
@@ -95,6 +183,16 @@ export const useOutfitStore = create<OutfitStore>((set, get) => ({
 
   getRecordsByMonth: (yearMonth) => {
     return get().records.filter((r) => r.date.startsWith(yearMonth));
+  },
+
+  getRecordsByWeek: (weekStart) => {
+    const start = dayjs(weekStart);
+    const end = start.add(6, 'day');
+    return get().records.filter((r) => {
+      const d = dayjs(r.date);
+      return (d.isAfter(start.subtract(1, 'day')) || d.isSame(start, 'day')) &&
+             (d.isBefore(end.add(1, 'day')) || d.isSame(end, 'day'));
+    });
   },
 
   generateMonthlyReport: (yearMonth) => {
@@ -142,6 +240,56 @@ export const useOutfitStore = create<OutfitStore>((set, get) => ({
       mostWorn,
       byScene,
       outfitRecords: records
+    };
+  },
+
+  generateWeeklyReport: (weekStart) => {
+    const start = dayjs(weekStart);
+    const end = start.add(6, 'day');
+    const weekRecords = get().getRecordsByWeek(weekStart);
+
+    const shoeCountMap = new Map<string, { count: number; name: string; image: string }>();
+    weekRecords.forEach((record) => {
+      const existing = shoeCountMap.get(record.shoeId);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        shoeCountMap.set(record.shoeId, {
+          count: 1,
+          name: record.shoeName,
+          image: record.shoeImage || ''
+        });
+      }
+    });
+
+    let mostWorn = null;
+    let maxCount = 0;
+    shoeCountMap.forEach((data) => {
+      if (data.count > maxCount) {
+        maxCount = data.count;
+        mostWorn = data;
+      }
+    });
+
+    const dailyRecords: { date: string; weekday: number; record: OutfitRecord | null }[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = start.add(i, 'day');
+      const dateStr = d.format('YYYY-MM-DD');
+      const record = weekRecords.find((r) => r.date === dateStr) || null;
+      dailyRecords.push({ date: dateStr, weekday: d.day(), record });
+    }
+
+    const missedDays = dailyRecords.filter(
+      (d) => d.record === null && dayjs(d.date).isBefore(dayjs().startOf('day'))
+    ).length;
+
+    return {
+      weekStart: start.format('YYYY-MM-DD'),
+      weekEnd: end.format('YYYY-MM-DD'),
+      totalWears: weekRecords.length,
+      missedDays,
+      mostWorn,
+      dailyRecords
     };
   }
 }));

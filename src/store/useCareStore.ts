@@ -13,6 +13,8 @@ interface CareStore {
   initFromStorage: () => void;
   saveToStorage: () => void;
   addCareRecord: (record: Omit<CareRecord, 'id'>) => void;
+  updateCareRecord: (id: string, updates: Partial<Omit<CareRecord, 'id'>>) => void;
+  deleteCareRecord: (id: string) => void;
   addCareProduct: (product: Omit<CareProduct, 'id'>) => void;
   setRotationPlan: (plan: RotationPlan) => void;
   getCareRecordsByShoe: (shoeId: string) => CareRecord[];
@@ -72,6 +74,24 @@ export const useCareStore = create<CareStore>((set, get) => ({
     }));
     get().saveToStorage();
     console.log('[CareStore] 添加保养记录:', newRecord.shoeName, newRecord.type);
+  },
+
+  updateCareRecord: (id, updates) => {
+    set((state) => ({
+      careRecords: state.careRecords.map((r) =>
+        r.id === id ? { ...r, ...updates } : r
+      )
+    }));
+    get().saveToStorage();
+    console.log('[CareStore] 更新保养记录:', id);
+  },
+
+  deleteCareRecord: (id) => {
+    set((state) => ({
+      careRecords: state.careRecords.filter((r) => r.id !== id)
+    }));
+    get().saveToStorage();
+    console.log('[CareStore] 删除保养记录:', id);
   },
 
   addCareProduct: (productData) => {
